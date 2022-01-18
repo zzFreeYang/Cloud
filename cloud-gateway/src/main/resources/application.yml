@@ -1,0 +1,48 @@
+server:
+  port: 9999
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    nacos:
+      server-addr: 192.168.20.137:8848
+    gateway:
+      routes: #配置路由规则
+        #admin router
+        - id: adminmanage_router
+#          uri: http://localhost:8980   单机写法
+          uri: lb://API-ADMINS   #负载均衡写法，注册中心的admins
+          predicates:
+            - Path=/admin/demos,/admin/tokens,/admin/admin-user,/admin/tokens/**
+          filters:
+            - StripPrefix= 1 #去掉请求前缀filter  int 数字 1:去掉一级
+
+
+
+        - id: category_router
+          uri: lb://API-CATEGORIES
+          predicates:
+            - Path=/category/demos
+          filters:
+            - StripPrefix= 1
+
+        - id: users_router
+          uri: lb://API-USERS
+          predicates:
+            - Path=/users/demos
+          filters:
+            - StripPrefix= 1
+
+        - id: atricles_router
+          uri: lb://API-ARTICLES
+          predicates:
+            - Path=/articles/demos
+          filters:
+            - StripPrefix= 1
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*" #允许所有域名访问
+            allowedMethods: "*" #允许所有请求方式访问
+            allowedHeaders: "*" #允许所有请求头可以访问

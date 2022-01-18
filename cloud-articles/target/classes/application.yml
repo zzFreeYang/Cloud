@@ -1,0 +1,8 @@
+server:
+  port: 8983
+spring:
+  application:
+    name: API-ARTICLES
+  cloud:
+    nacos:
+      server-addr: 192.168.20.137:8848

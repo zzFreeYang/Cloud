@@ -1,0 +1,34 @@
+version: "3.9"
+
+volumes:
+  data:
+  redisdata:
+
+services:
+  nacos:
+    image: nacos/nacos-server:2.0.2
+#    container_name: nacos   容器名字
+    ports:
+      - "8848:8848"
+    environment:
+      - "JVM-XMS=256m"
+      - "JVM-XMX=256m"
+      - "MODE=standalone"
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - data:/var/lib/mysql
+      - ./1126.sql:/docker-entrypoint-initdb.d/1126.sql #当前目录的sql映射到initdb目录，为了初始化数据库生成表
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+      - "MYSQL_DATABASE=zzFree"
+
+  redis:
+    image: redis:5.0.10
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
