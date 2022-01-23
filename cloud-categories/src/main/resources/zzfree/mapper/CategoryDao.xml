@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zzfree.dao.CategoryDao">
+
+    <resultMap type="zzfree.entity.Category" id="CategoryMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="parentid" column="parentid" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+        <result property="deketedAt" column="deketed_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+<!--    CategoriesMap列表-->
+    <resultMap type="zzfree.entity.Category" id="CategoriesMap">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+<!--        封装孩子-->
+        <collection property="childeren" javaType="list" ofType="zzfree.entity.Category">
+            <id property="id" column="cid" jdbcType="INTEGER"/>
+            <result property="name" column="cname" jdbcType="VARCHAR"/>
+            <result property="parentid" column="cparentid"></result>
+        </collection>
+    </resultMap>
+
+    <select id="queryByFirstLevel" resultMap="CategoriesMap">
+                select
+          a.id, a.name,b.id cid,b.name cname,b.parentid cparentid
+        from category a
+        left join category b
+        on a.id = b.parentid
+         where a.parentid is null
+    </select>
+
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="CategoryMap">
+        select
+          id, parentid, name, created_at, updated_at, deketed_at
+        from category
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="CategoryMap">
+        select
+          id, parentid, name, created_at, updated_at, deketed_at
+        from category
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="parentid != null">
+                and parentid = #{parentid}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="createdAt != null">
+                and created_at = #{createdAt}
+            </if>
+            <if test="updatedAt != null">
+                and updated_at = #{updatedAt}
+            </if>
+            <if test="deketedAt != null">
+                and deketed_at = #{deketedAt}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from category
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="parentid != null">
+                and parentid = #{parentid}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="createdAt != null">
+                and created_at = #{createdAt}
+            </if>
+            <if test="updatedAt != null">
+                and updated_at = #{updatedAt}
+            </if>
+            <if test="deketedAt != null">
+                and deketed_at = #{deketedAt}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into category(parentid, name, created_at, updated_at, deketed_at)
+        values (#{parentid}, #{name}, #{createdAt}, #{updatedAt}, #{deketedAt})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into category(parentid, name, created_at, updated_at, deketed_at)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.parentid}, #{entity.name}, #{entity.createdAt}, #{entity.updatedAt}, #{entity.deketedAt})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into category(parentid, name, created_at, updated_at, deketed_at)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.parentid}, #{entity.name}, #{entity.createdAt}, #{entity.updatedAt}, #{entity.deketedAt})
+        </foreach>
+        on duplicate key update
+        parentid = values(parentid),
+        name = values(name),
+        created_at = values(created_at),
+        updated_at = values(updated_at),
+        deketed_at = values(deketed_at)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update category
+        <set>
+            <if test="parentid != null">
+                parentid = #{parentid},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="createdAt != null">
+                created_at = #{createdAt},
+            </if>
+            <if test="updatedAt != null">
+                updated_at = #{updatedAt},
+            </if>
+            <if test="deketedAt != null">
+                deketed_at = #{deketedAt},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from category where id = #{id}
+    </delete>
+
+</mapper>
+

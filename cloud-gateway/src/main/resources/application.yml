@@ -22,7 +22,7 @@ spring:
         - id: category_router
           uri: lb://API-CATEGORIES
           predicates:
-            - Path=/category/demos
+            - Path=/category/demos,/category/categories,/category/categories/**,/categories,/categories/**
           filters:
             - StripPrefix= 1
 
