@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.baizhi.dao.UserDao">
+<mapper namespace="zzfree.dao.UserDao">
 
     <!--查询条件公共片段-->
     <sql id="keywordFields">
@@ -19,7 +19,7 @@
 
 
     <!--封装用户信息-->
-    <resultMap type="com.baizhi.entity.User" id="UserMap">
+    <resultMap type="zzfree.entity.User" id="UserMap">
         <result property="id" column="id" jdbcType="INTEGER"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
         <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
@@ -40,7 +40,7 @@
     <select id="findAllByKeywords" resultMap="UserMap">
         select
         id, name, avatar, intro, phone, phone_linked, openid, wechat_linked, following_count, followers_count, created_at, updated_at, deleted_at
-        from yingxue.user
+        from user
         <include refid="keywordFields"/>
         limit #{offset}, #{limit}
     </select>
@@ -49,7 +49,7 @@
     <select id="findTotalCountsByKeywords" resultType="Long">
         select
         count(id)
-        from yingxue.user
+        from user
         <include refid="keywordFields"/>
     </select>
 
