@@ -36,7 +36,7 @@ spring:
         - id: atricles_router
           uri: lb://API-ARTICLES
           predicates:
-            - Path=/articles/demos
+            - Path=/articles/demos,/admin/articles/**
           filters:
             - StripPrefix= 1
 

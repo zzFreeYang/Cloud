@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zzfree.dao.ArticleDao">
+
+    <resultMap type="zzfree.entity.Article" id="ArticleMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="title" column="title" jdbcType="VARCHAR"/>
+        <result property="uid" column="uid" jdbcType="INTEGER"/>
+        <result property="cover" column="cover" jdbcType="VARCHAR"/>
+        <result property="link" column="link" jdbcType="VARCHAR"/>
+        <result property="categoryId" column="category_id" jdbcType="INTEGER"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+        <result property="deletedAt" column="deketed_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+<!--    封装文章Map-->
+    <resultMap id="ArticleCategoryUserMap" type="zzfree.entity.Article" extends="ArticleMap">
+        <!--维护类别-->
+        <result property="category" column="category" jdbcType="VARCHAR"/>
+        <!--维护用户-->
+        <association property="uploader" javaType="zzfree.entity.User">
+            <result property="id" column="id" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+            <result property="password" column="password" jdbcType="VARCHAR"/>
+            <result property="showname" column="showname" jdbcType="VARCHAR"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+            <result property="deketedAt" column="deketed_at" jdbcType="TIMESTAMP"/>
+        </association>
+    </resultMap>
+
+
+    <sql id="keyWordFields">
+        <where>
+            <if test="id != null">
+                and v.id = #{id}
+            </if>
+            <if test="title != null and title != ''">
+                and v.title like concat('%',#{title},'%')
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                and c.id = #{categoryId}
+            </if>
+            <if test="username != null and username != ''">
+                and u.name = #{username}
+            </if>
+        </where>
+    </sql>
+
+
+    <!--分页查询-->
+    <select id="findAllByKeywords" resultMap="ArticleCategoryUserMap">
+        select
+        v.id, v.title, v.uid, v.cover, v.link, v.category_id, v.created_at, v.updated_at, v.deleted_at,
+        c.name category,
+        u.id userid, u.name username, u.avatar, u.created_at ucreated, u.updated_at updated, u.deketed_at udeleted
+        from article v
+        left join category c on v.category_id = c.id
+        left join user u on v.uid = u.id
+        <include refid="keyWordFields"/>
+        limit #{offset},#{limit}
+    </select>
+
+
+    <select id="findTotalCountsByKeywords" resultType="Long">
+        select
+        count(v.id)
+        from article v
+        left join category c on v.category_id = c.id
+        left join user u on v.uid = u.id
+        <include refid="keyWordFields"/>
+    </select>
+
+    <!--查询单个-->
+    <select id="queryById" resultMap="ArticleMap">
+        select
+          id, title, uid, cover, link, category_id, created_at, updated_at, deketed_at
+        from article
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="ArticleMap">
+        select
+          id, title, uid, cover, link, category_id, created_at, updated_at, deketed_at
+        from article
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="title != null and title != ''">
+                and title = #{title}
+            </if>
+            <if test="uid != null">
+                and uid = #{uid}
+            </if>
+            <if test="cover != null and cover != ''">
+                and cover = #{cover}
+            </if>
+            <if test="link != null and link != ''">
+                and link = #{link}
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="createdAt != null">
+                and created_at = #{createdAt}
+            </if>
+            <if test="updatedAt != null">
+                and updated_at = #{updatedAt}
+            </if>
+            <if test="deketedAt != null">
+                and deketed_at = #{deketedAt}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--统计总行数-->
+    <select id="count" resultType="java.lang.Long">
+        select count(1)
+        from article
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="title != null and title != ''">
+                and title = #{title}
+            </if>
+            <if test="uid != null">
+                and uid = #{uid}
+            </if>
+            <if test="cover != null and cover != ''">
+                and cover = #{cover}
+            </if>
+            <if test="link != null and link != ''">
+                and link = #{link}
+            </if>
+            <if test="categoryId != null">
+                and category_id = #{categoryId}
+            </if>
+            <if test="createdAt != null">
+                and created_at = #{createdAt}
+            </if>
+            <if test="updatedAt != null">
+                and updated_at = #{updatedAt}
+            </if>
+            <if test="deketedAt != null">
+                and deketed_at = #{deketedAt}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into article(title, uid, cover, link, category_id, created_at, updated_at, deketed_at)
+        values (#{title}, #{uid}, #{cover}, #{link}, #{categoryId}, #{createdAt}, #{updatedAt}, #{deketedAt})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into article(title, uid, cover, link, category_id, created_at, updated_at, deketed_at)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.title}, #{entity.uid}, #{entity.cover}, #{entity.link}, #{entity.categoryId}, #{entity.createdAt}, #{entity.updatedAt}, #{entity.deketedAt})
+        </foreach>
+    </insert>
+
+    <insert id="insertOrUpdateBatch" keyProperty="id" useGeneratedKeys="true">
+        insert into article(title, uid, cover, link, category_id, created_at, updated_at, deketed_at)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.title}, #{entity.uid}, #{entity.cover}, #{entity.link}, #{entity.categoryId}, #{entity.createdAt}, #{entity.updatedAt}, #{entity.deketedAt})
+        </foreach>
+        on duplicate key update
+        title = values(title),
+        uid = values(uid),
+        cover = values(cover),
+        link = values(link),
+        category_id = values(category_id),
+        created_at = values(created_at),
+        updated_at = values(updated_at),
+        deketed_at = values(deketed_at)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update article
+        <set>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="uid != null">
+                uid = #{uid},
+            </if>
+            <if test="cover != null and cover != ''">
+                cover = #{cover},
+            </if>
+            <if test="link != null and link != ''">
+                link = #{link},
+            </if>
+            <if test="categoryId != null">
+                category_id = #{categoryId},
+            </if>
+            <if test="createdAt != null">
+                created_at = #{createdAt},
+            </if>
+            <if test="updatedAt != null">
+                updated_at = #{updatedAt},
+            </if>
+            <if test="deketedAt != null">
+                deketed_at = #{deketedAt},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from article where id = #{id}
+    </delete>
+
+</mapper>
+
